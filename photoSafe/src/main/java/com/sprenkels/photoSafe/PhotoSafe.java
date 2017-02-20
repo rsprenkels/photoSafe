@@ -11,7 +11,7 @@ public class PhotoSafe {
 	HashSet<File> files; 
 	
 	PhotoSafe() {
-		this("../fotos");
+		this("../theSafe");
 	}
 	
 	PhotoSafe(String baseDir) {
