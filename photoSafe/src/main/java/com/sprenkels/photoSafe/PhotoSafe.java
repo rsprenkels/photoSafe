@@ -1,6 +1,7 @@
 package com.sprenkels.photoSafe;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.apache.log4j.Logger;
@@ -8,15 +9,15 @@ import org.apache.log4j.Logger;
 public class PhotoSafe {
 	String baseDir;
 	final static Logger log = Logger.getLogger(PhotoSafe.class);
-	HashSet<File> files; 
+	HashMap<Long, File> filesBySize;
 	
 	PhotoSafe() {
 		this("../theSafe");
 	}
 	
 	PhotoSafe(String baseDir) {
-		this.baseDir =  baseDir;		
-		files = new HashSet<File>();
+		this.baseDir = baseDir;		
+		filesBySize = new HashMap<Long, File>();
 		init();
 	}
 	
@@ -27,20 +28,23 @@ public class PhotoSafe {
 			if(file.isDirectory()){
 				checkDiff(file.getPath());
 			} else {
-				if(file.getName().matches("^(.*?)")){
-					File foundPsFile = null;
-					for (File psFile : files) {
-						if(file.length() == psFile.length()) {
-							foundPsFile = psFile;
-							break;
-						}
-					}
-					log.debug("Diffing file " + (foundPsFile == null ? "not found" : foundPsFile.getPath()) + " " + file.length() + " " + file.getPath());
+				if(isRelevantFile(file) && !containsFile(file)) {
+					log.debug("found new file " + file.getPath());
 				}				
 			}
 		}
 	}
+	
+	boolean
+	isRelevantFile(File f) {
+		return f.getName().matches("^(.*?)");
+	}
 
+	boolean
+	containsFile(File f) {
+		return filesBySize.containsKey(f.length());
+	}
+	
 	void
 	init(String baseDir) {
 		File[] faFiles = new File(baseDir).listFiles();
@@ -50,7 +54,7 @@ public class PhotoSafe {
 			} else {
 				if(file.getName().matches("^(.*?)")){
 					log.debug("found file " + file.length() + " " + file.getPath());
-					files.add(file);
+					filesBySize.put(file.length(), file);
 				}				
 			}
 		}
