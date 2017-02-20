@@ -20,7 +20,7 @@ public class PhotoSafe {
 		filesBySize = new HashMap<Long, File>();
 		init();
 	}
-	
+		
 	public void
 	checkDiff(String diffDir) {
 		File[] faFiles = new File(diffDir).listFiles();
@@ -29,8 +29,10 @@ public class PhotoSafe {
 				checkDiff(file.getPath());
 			} else {
 				if(isRelevantFile(file) && !containsFile(file)) {
-					log.debug("found new file " + file.getPath());
-				}				
+					log.debug("NEW      " + file.getPath());
+				} else {				
+					log.debug("EXISTING " + file.getPath());
+				}
 			}
 		}
 	}
