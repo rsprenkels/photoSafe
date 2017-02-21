@@ -23,7 +23,7 @@ public class PhotoSafe {
 	}
 		
 	private void init() {
-		log.debug("initializing from baseDir " + baseDir);
+		log.debug("initializing change in master from baseDir " + baseDir);
 		init(baseDir);
 	}
 
