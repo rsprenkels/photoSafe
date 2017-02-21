@@ -3,8 +3,9 @@ package com.sprenkels.photoSafe;
 public class MainPhotoSafe {
 
 	public static void main(String[] args) {
-		PhotoSafe ps = new PhotoSafe("I:/FotoVideoMASTER/master");
+		PhotoSafe ps = new PhotoSafe();
 		ps.checkDiff("../additions");
-		ps.checkDiff("I:/FotoVideoMASTER/fotovideoToevoegen");
+		ps.showContents();
+		// ps.checkDiff("I:/FotoVideoMASTER/fotovideoToevoegen");
 	}
 }
