@@ -11,16 +11,37 @@ public class PhotoSafe {
 	final static Logger log = Logger.getLogger(PhotoSafe.class);
 	HashMap<Long, File> filesBySize;
 	
+	
 	PhotoSafe() {
 		this("../theSafe");
 	}
 	
 	PhotoSafe(String baseDir) {
 		this.baseDir = baseDir;		
-		filesBySize = new HashMap<Long, File>();
+			 filesBySize = new HashMap<Long, File>();
 		init();
 	}
 		
+	private void init() {
+		log.debug("initializing from baseDir " + baseDir);
+		init(baseDir);
+	}
+
+	void
+	init(String baseDir) {
+		File[] faFiles = new File(baseDir).listFiles();
+		for(File file: faFiles) {
+			if(file.isDirectory()){
+				init(file.getPath());
+			} else {
+				if(file.getName().matches("^(.*?)")){
+					log.debug("found file " + file.length() + " " + file.getPath());
+					filesBySize.put(file.length(), file);
+				}				
+			}
+		}
+	}
+	
 	public void
 	checkDiff(String diffDir) {
 		File[] faFiles = new File(diffDir).listFiles();
@@ -45,25 +66,5 @@ public class PhotoSafe {
 	boolean
 	containsFile(File f) {
 		return filesBySize.containsKey(f.length());
-	}
-	
-	void
-	init(String baseDir) {
-		File[] faFiles = new File(baseDir).listFiles();
-		for(File file: faFiles) {
-			if(file.isDirectory()){
-				init(file.getPath());
-			} else {
-				if(file.getName().matches("^(.*?)")){
-					log.debug("found file " + file.length() + " " + file.getPath());
-					filesBySize.put(file.length(), file);
-				}				
-			}
-		}
-	}
-	
-	private void init() {
-		log.debug("initializing from baseDir " + baseDir);
-		init(baseDir);
-	}
+	}	
 }
