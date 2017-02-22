@@ -29,17 +29,24 @@ public class PhotoSafe {
 			} else {
 				if(isRelevantFile(file)){
 					log.debug("found file " + file.length() + " " + file.getPath());
-					ArrayList<FileData> alf = filesBySize.get(file.length());
-					if (alf == null ) {
-						alf = new ArrayList<FileData>();
-						filesBySize.put(file.length(), alf);
-					}
-					if (alf.size() == 0) {
-						alf.add(new FileData(file));
-					} else {
-						
-					}
+					addFile(file);
 				}				
+			}
+		}
+	}
+
+	private void addFile(File file) {
+		ArrayList<FileData> alf = filesBySize.get(file.length());
+		if (alf == null ) {
+			alf = new ArrayList<FileData>();
+			filesBySize.put(file.length(), alf);
+		}
+		if (alf.size() == 0) {
+			alf.add(new FileData(file));
+		} else {
+			alf.add(new FileData(file));
+			for (FileData fd : alf) {
+				fd.fillCrc();
 			}
 		}
 	}
@@ -76,9 +83,14 @@ public class PhotoSafe {
 				checkDiff(file.getPath());
 			} else {
 				if(isRelevantFile(file) && !containsFile(file)) {
-					log.debug("NEW      " + file.getPath());
+					addFile(file);
+					String message = String.format("ADDED size %9d file %s",
+							file.length(), file.getPath());
+					log.debug(message);
 				} else {				
-					log.debug("EXISTING " + file.getPath());
+					String message = String.format("EXIST size %9d file %s",
+							file.length(), file.getPath());
+					log.debug(message);
 				}
 			}
 		}
@@ -86,13 +98,13 @@ public class PhotoSafe {
 	
 	public void
 	showContents() {
+		log.debug("Contents:");
 		for (Long size : filesBySize.keySet()) {
 			if (filesBySize.get(size).size() < 1) {
 				continue;
 			}
 			for (FileData f : filesBySize.get(size)) {
-				String message = String.format("size %9d file %s", f.f.length(), f.f.getPath());
-				log.debug(message);
+				log.debug(f.toString());
 			}
 		}
 	}
