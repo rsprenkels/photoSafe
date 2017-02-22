@@ -3,14 +3,12 @@ package com.sprenkels.photoSafe;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-
 import org.apache.log4j.Logger;
 
 public class PhotoSafe {
 	String baseDir;
 	final static Logger log = Logger.getLogger(PhotoSafe.class);
-	HashMap<Long, ArrayList<File>> filesBySize;
+	HashMap<Long, ArrayList<FileData>> filesBySize;
 	
 	PhotoSafe() {
 		this("../theSafe");
@@ -18,7 +16,7 @@ public class PhotoSafe {
 	
 	PhotoSafe(String baseDir) {
 		this.baseDir = baseDir;		
-		filesBySize = new HashMap<Long, ArrayList<File>>();
+		filesBySize = new HashMap<Long, ArrayList<FileData>>();
 		init();
 	}
 			
@@ -31,12 +29,16 @@ public class PhotoSafe {
 			} else {
 				if(isRelevantFile(file)){
 					log.debug("found file " + file.length() + " " + file.getPath());
-					ArrayList<File> alf = filesBySize.get(file.length());
+					ArrayList<FileData> alf = filesBySize.get(file.length());
 					if (alf == null ) {
-						alf = new ArrayList<File>();
+						alf = new ArrayList<FileData>();
 						filesBySize.put(file.length(), alf);
 					}
-					alf.add(file);
+					if (alf.size() == 0) {
+						alf.add(new FileData(file));
+					} else {
+						
+					}
 				}				
 			}
 		}
@@ -53,8 +55,17 @@ public class PhotoSafe {
 	}
 
 	boolean
-	containsFile(File f) {
-		return filesBySize.containsKey(f.length());
+	containsFile(File thisFile) {
+		if (!filesBySize.containsKey(thisFile.length())) {
+			return false;
+		}
+		FileData tfd = new FileData(thisFile);
+		for (FileData fd : filesBySize.get(thisFile.length())) {
+			if (fd.equals(tfd)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void
@@ -79,8 +90,8 @@ public class PhotoSafe {
 			if (filesBySize.get(size).size() < 1) {
 				continue;
 			}
-			for (File f : filesBySize.get(size)) {
-				String message = String.format("size %9d file %s", f.length(), f.getPath());
+			for (FileData f : filesBySize.get(size)) {
+				String message = String.format("size %9d file %s", f.f.length(), f.f.getPath());
 				log.debug(message);
 			}
 		}
