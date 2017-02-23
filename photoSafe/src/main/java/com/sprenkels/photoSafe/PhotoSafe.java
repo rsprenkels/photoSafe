@@ -1,12 +1,16 @@
 package com.sprenkels.photoSafe;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 public class PhotoSafe {
 	String baseDir;
+	String newFilesStore = "additions";
 	final static Logger log = Logger.getLogger(PhotoSafe.class);
 	HashMap<Long, ArrayList<FileData>> filesBySize;
 	
@@ -83,6 +87,7 @@ public class PhotoSafe {
 				checkDiff(file.getPath());
 			} else {
 				if(isRelevantFile(file) && !containsFile(file)) {
+					copyFile(file);
 					addFile(file);
 					String message = String.format("ADDED size %9d file %s",
 							file.length(), file.getPath());
@@ -96,6 +101,17 @@ public class PhotoSafe {
 		}
 	}
 	
+	private void copyFile(File file) {
+		String fileName = baseDir + File.separator + newFilesStore + File.separator + file.getName();
+		try {
+			Files.copy(Paths.get(file.getAbsolutePath()), Paths.get(fileName));
+			log.debug("copied " + fileName);
+		} catch (IOException e) {
+			log.error("copy of " + fileName + " FAILED");
+			e.printStackTrace();
+		}
+	}
+
 	public void
 	showContents() {
 		log.debug("Contents:");
