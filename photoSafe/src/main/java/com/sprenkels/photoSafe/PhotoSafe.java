@@ -1,16 +1,18 @@
 package com.sprenkels.photoSafe;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-
 import org.apache.log4j.Logger;
 
 public class PhotoSafe {
 	String baseDir;
+	String newFilesStore = "additions";
 	final static Logger log = Logger.getLogger(PhotoSafe.class);
-	HashMap<Long, ArrayList<File>> filesBySize;
+	HashMap<Long, ArrayList<FileData>> filesBySize;
 	
 	
 	PhotoSafe() {
@@ -19,7 +21,7 @@ public class PhotoSafe {
 	
 	PhotoSafe(String baseDir) {
 		this.baseDir = baseDir;		
-		filesBySize = new HashMap<Long, ArrayList<File>>();
+		filesBySize = new HashMap<Long, ArrayList<FileData>>();
 		init();
 	}
 			
@@ -32,13 +34,24 @@ public class PhotoSafe {
 			} else {
 				if(isRelevantFile(file)){
 					log.debug("found file " + file.length() + " " + file.getPath());
-					ArrayList<File> alf = filesBySize.get(file.length());
-					if (alf == null ) {
-						alf = new ArrayList<File>();
-						filesBySize.put(file.length(), alf);
-					}
-					alf.add(file);
+					addFile(file);
 				}				
+			}
+		}
+	}
+
+	private void addFile(File file) {
+		ArrayList<FileData> alf = filesBySize.get(file.length());
+		if (alf == null ) {
+			alf = new ArrayList<FileData>();
+			filesBySize.put(file.length(), alf);
+		}
+		if (alf.size() == 0) {
+			alf.add(new FileData(file));
+		} else {
+			alf.add(new FileData(file));
+			for (FileData fd : alf) {
+				fd.fillCrc();
 			}
 		}
 	}
@@ -54,8 +67,17 @@ public class PhotoSafe {
 	}
 
 	boolean
-	containsFile(File f) {
-		return filesBySize.containsKey(f.length());
+	containsFile(File thisFile) {
+		if (!filesBySize.containsKey(thisFile.length())) {
+			return false;
+		}
+		FileData tfd = new FileData(thisFile);
+		for (FileData fd : filesBySize.get(thisFile.length())) {
+			if (fd.equals(tfd)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void
@@ -66,23 +88,40 @@ public class PhotoSafe {
 				checkDiff(file.getPath());
 			} else {
 				if(isRelevantFile(file) && !containsFile(file)) {
-					log.debug("NEW      " + file.getPath());
+					copyFile(file);
+					addFile(file);
+					String message = String.format("ADDED size %9d file %s",
+							file.length(), file.getPath());
+					log.debug(message);
 				} else {				
-					log.debug("EXISTING " + file.getPath());
+					String message = String.format("EXIST size %9d file %s",
+							file.length(), file.getPath());
+					log.debug(message);
 				}
 			}
 		}
 	}
 	
+	private void copyFile(File file) {
+		String fileName = baseDir + File.separator + newFilesStore + File.separator + file.getName();
+		try {
+			Files.copy(Paths.get(file.getAbsolutePath()), Paths.get(fileName));
+			log.debug("copied " + fileName);
+		} catch (IOException e) {
+			log.error("copy of " + fileName + " FAILED");
+			e.printStackTrace();
+		}
+	}
+
 	public void
 	showContents() {
+		log.debug("Contents:");
 		for (Long size : filesBySize.keySet()) {
 			if (filesBySize.get(size).size() < 1) {
 				continue;
 			}
-			for (File f : filesBySize.get(size)) {
-				String message = String.format("size %9d file %s", f.length(), f.getPath());
-				log.debug(message);
+			for (FileData f : filesBySize.get(size)) {
+				log.debug(f.toString());
 			}
 		}
 	}
