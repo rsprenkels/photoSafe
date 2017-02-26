@@ -22,9 +22,18 @@ public class PhotoSafe {
 	PhotoSafe(String baseDir) {
 		this.baseDir = baseDir;		
 		filesBySize = new HashMap<Long, ArrayList<FileData>>();
+		verifyCreateAdditionsDir();
 		init();
 	}
 			
+	private void verifyCreateAdditionsDir() {
+		String fileName = baseDir + File.separator + newFilesStore;
+		File test = new File(fileName);
+		if(!test.exists() || !test.isDirectory()) {
+			test.mkdirs();
+		}
+	}
+
 	void
 	init(String baseDir) {
 		File[] faFiles = new File(baseDir).listFiles();
@@ -102,13 +111,27 @@ public class PhotoSafe {
 		}
 	}
 	
-	private void copyFile(File file) {
-		String fileName = baseDir + File.separator + newFilesStore + File.separator + file.getName();
+	private void copyFile(File sourceFile) {
+		String targetAbsolutePath = baseDir + File.separator + newFilesStore + File.separator + sourceFile.getName();
+		if (new File(targetAbsolutePath).exists()) {
+			String checkTarget = "";
+			for (int x = 1; x <= 999; x++) {
+				checkTarget = 
+					targetAbsolutePath.replaceAll("^(.*)\\.[^\\.]+$", "$1") + 
+					String.format("_D%03d", x) + 
+					targetAbsolutePath.replaceAll("^.*(\\.[^\\.]+)$", "$1");
+				log.debug("checking if " + checkTarget + " exists");
+				if (! new File(checkTarget).exists()) {
+					break;
+				}
+			}
+			targetAbsolutePath = checkTarget;
+		}
 		try {
-			Files.copy(Paths.get(file.getAbsolutePath()), Paths.get(fileName));
-			log.debug("copied " + fileName);
+			Files.copy(Paths.get(sourceFile.getAbsolutePath()), Paths.get(targetAbsolutePath));
+			log.debug("copied " + targetAbsolutePath);
 		} catch (IOException e) {
-			log.error("copy of " + fileName + " FAILED");
+			log.error("copy of " + targetAbsolutePath + " FAILED");
 			e.printStackTrace();
 		}
 	}
