@@ -92,6 +92,10 @@ public class PhotoSafe {
 	public void
 	checkDiff(String diffDir) {
 		File[] faFiles = new File(diffDir).listFiles();
+		if (faFiles == null) {
+			log.debug("nothing found in " + diffDir);
+			return;
+		}
 		for(File file: faFiles) {
 			if(file.isDirectory()){
 				checkDiff(file.getPath());

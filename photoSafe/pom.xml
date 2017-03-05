@@ -49,7 +49,7 @@
 							<mainClass>com.sprenkels.photoSafe.MainPhotoSafe</mainClass>
 							<addClasspath>true</addClasspath>
 							<classpathMavenRepositoryLayout>true</classpathMavenRepositoryLayout>
-							<classpathPrefix>/home/ron/.m2/repository</classpathPrefix>
+							<classpathPrefix>~/.m2/repository</classpathPrefix>
 						</manifest>
 					</archive>
 				</configuration>
