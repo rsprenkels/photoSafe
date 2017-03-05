@@ -47,9 +47,12 @@ public class MainPhotoSafe {
 		
 //		PhotoSafe ps = new PhotoSafe("I:\\FotoVideoMASTER\\master\\2004");
 		PhotoSafe ps = new PhotoSafe(conf.getProperty("storePath", "."));
+		log.debug("showing Contents  ");
 		ps.showContents();
-		// ps.checkDiff(conf.getProperty("storePath", "."));
+		log.debug("checking " + conf.getProperty("checkAndAddDiff"));
+		ps.checkDiff(conf.getProperty("checkAndAddDiff"));
 		// ps.checkDiff("../additions");
 		// ps.showContents();
+		log.debug("Finished.");
 	}
 }
