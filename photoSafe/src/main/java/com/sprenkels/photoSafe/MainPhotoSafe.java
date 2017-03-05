@@ -54,5 +54,6 @@ public class MainPhotoSafe {
 		// ps.checkDiff("../additions");
 		// ps.showContents();
 		log.debug("Finished.");
+		System.exit(0);
 	}
 }
